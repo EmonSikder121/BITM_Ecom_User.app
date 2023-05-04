@@ -38,13 +38,13 @@ class MainDrawer extends StatelessWidget {
             leading: const Icon(Icons.monetization_on),
             title: const Text('My Orders'),
           ),
-          ListTile(
+          /*ListTile(
             onTap: () {
               Navigator.pushReplacementNamed(context, LoginPage.routeName);
             },
             leading: const Icon(Icons.person),
             title: const Text('Login/Register'),
-          ),
+          ),*/
           ListTile(
             onTap: () {
               AuthService.logout().then((value) =>

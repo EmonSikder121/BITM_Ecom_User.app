@@ -6,6 +6,7 @@ showSingleTextInputDialog({
   required String title,
   String positiveButtonText = 'OK',
   String negativeButtonText = 'CLOSE',
+  TextInputType inputType = TextInputType.text,
   required Function(String) onSubmit,
 }) {
   final txtController = TextEditingController();
@@ -14,6 +15,7 @@ showSingleTextInputDialog({
     content: Padding(
       padding: const EdgeInsets.all(12),
       child: TextField(
+        keyboardType: inputType,
         controller: txtController,
         decoration: InputDecoration(
           labelText: 'Enter $title',

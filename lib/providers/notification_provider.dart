@@ -6,6 +6,10 @@ import '../models/notification_model.dart';
 class NotificationProvider extends ChangeNotifier {
   List<NotificationModel> notificationList = [];
 
+  Future<void> addNotification(NotificationModel notificationModel) {
+    return DbHelper.addNotification(notificationModel);
+  }
+
   /*getAllNotifications() {
     DbHelper.getAllNotifications().listen((snapshot) {
       notificationList = List.generate(snapshot.docs.length,

@@ -175,10 +175,11 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                   OutlinedButton(
                     onPressed: () async {
-
-                      //EasyLoading.show(status: 'Please wait');
-
-                      //showMsg(context, 'Thanks for your rating');
+                      EasyLoading.show(status: 'Please wait');
+                      await productProvider.addRating(
+                          userRating, productModel.productId!);
+                      showMsg(context, 'Thanks for your rating');
+                      EasyLoading.dismiss();
                     },
                     child: const Text('SUBMIT'),
                   )
@@ -208,13 +209,25 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                         return;
                       }
 
-                      //EasyLoading.show(status: 'Please wait');
+                      EasyLoading.show(status: 'Please wait');
+                      final commentModel = await productProvider.addComment(
+                        context.read<UserProvider>().userModel!,
+                        productModel.productId!,
+                        txtController.text,
+                      );
 
-
-                      //showMsg(context, 'Thanks for your comment. Your comment is waiting for Admin approval.');
-
-                      //EasyLoading.dismiss();
-                      //focusNode.unfocus();
+                      showMsg(context,
+                          'Thanks for your comment. Your comment is waiting for Admin approval.');
+                      //add notification for new comment
+                      final notificationModel = NotificationModel(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        type: NotificationType.comment,
+                        message: 'A comment on product ${productModel.productName} is waiting for your approval',
+                        commentModel: commentModel,
+                      );
+                      await context.read<NotificationProvider>().addNotification(notificationModel);
+                      EasyLoading.dismiss();
+                      focusNode.unfocus();
                     },
                     child: const Text('SUBMIT'),
                   )
@@ -226,7 +239,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             padding: EdgeInsets.all(8),
             child: Text('All Comments'),
           ),
-          /*FutureBuilder<List<CommentModel>>(
+          FutureBuilder<List<CommentModel>>(
             future: productProvider
                 .getAllCommentsByProduct(productModel.productId!),
             builder: (context, snapshot) {
@@ -238,7 +251,8 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   );
                 } else {
                   return Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 24.0),
                     child: Column(
                       children: commentList
                           .map((comment) => Column(
@@ -271,7 +285,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 child: Text('Loading comments...'),
               );
             },
-          )*/
+          )
         ],
       ),
     );

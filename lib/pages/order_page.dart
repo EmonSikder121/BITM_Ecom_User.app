@@ -22,44 +22,43 @@ class _OrderPageState extends State<OrderPage> {
       appBar: AppBar(
         title: const Text('Orders'),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          child: Consumer<OrderProvider>(
-            builder: (context, provider, child) {
-              final itemList = provider.orderItemList;
-              return ExpansionPanelList(
-                expansionCallback: (index, isExpanded) {
-                  setState(() {
-                    itemList[index].isExpanded = !isExpanded;
-                  });
-                },
-                children: itemList
-                    .map<ExpansionPanel>((item) => ExpansionPanel(
-                          isExpanded: item.isExpanded,
-                          headerBuilder: (context, isExpanded) => ListTile(
-                            title: Text(getFormattedDate(
-                                item.orderModel.orderDate.timestamp.toDate(),
-                                pattern: 'dd/MM/yyyy HH:mm:ss')),
-                            subtitle: Text(item.orderModel.orderStatus),
-                            trailing: Text(
-                                '$currencySymbol${item.orderModel.grandTotal}'),
-                          ),
-                          body: Column(
-                            children:
-                                item.orderModel.productDetails.map((cartModel) {
-                              return ListTile(
-                                title: Text(cartModel.productName),
-                                subtitle: Text(
-                                    '${cartModel.quantity}x${cartModel.salePrice}'),
-                              );
-                            }).toList(),
-                          ),
-                        ))
-                    .toList(),
-              );
-            },
-          ),
-        ),
+      body: Consumer<OrderProvider>(
+        builder: (context, provider, child) {
+          final itemList = provider.orderItemList;
+          if(itemList.isEmpty) return const Center(child: Text('You have no orders yet'),);
+          return SingleChildScrollView(
+            child: ExpansionPanelList(
+              expansionCallback: (index, isExpanded) {
+                setState(() {
+                  itemList[index].isExpanded = !isExpanded;
+                });
+              },
+              children: itemList
+                  .map<ExpansionPanel>((item) => ExpansionPanel(
+                        isExpanded: item.isExpanded,
+                        headerBuilder: (context, isExpanded) => ListTile(
+                          title: Text(getFormattedDate(
+                              item.orderModel.orderDate.timestamp.toDate(),
+                              pattern: 'dd/MM/yyyy HH:mm:ss')),
+                          subtitle: Text(item.orderModel.orderStatus),
+                          trailing: Text(
+                              '$currencySymbol${item.orderModel.grandTotal}'),
+                        ),
+                        body: Column(
+                          children:
+                              item.orderModel.productDetails.map((cartModel) {
+                            return ListTile(
+                              title: Text(cartModel.productName),
+                              subtitle: Text(
+                                  '${cartModel.quantity}x${cartModel.salePrice}'),
+                            );
+                          }).toList(),
+                        ),
+                      ))
+                  .toList(),
+            ),
+          );
+        },
       ),
     );
   }

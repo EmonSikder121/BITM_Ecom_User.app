@@ -87,12 +87,11 @@ class DbHelper {
   }
 
   static Future<void> addRating(RatingModel ratingModel) async {
-    final ratDoc = _db
+    return _db
         .collection(collectionProduct)
         .doc(ratingModel.productId)
         .collection(collectionRating)
-        .doc(ratingModel.userModel.userId);
-    return ratDoc.set(ratingModel.toMap());
+        .doc(ratingModel.userId).set(ratingModel.toMap());
   }
 
   static Future<void> addComment(CommentModel commentModel) {
@@ -100,7 +99,7 @@ class DbHelper {
         .collection(collectionProduct)
         .doc(commentModel.productId)
         .collection(collectionComment)
-        .doc(commentModel.commentId)
+        .doc(commentModel.commentId.toString())
         .set(commentModel.toMap());
   }
 

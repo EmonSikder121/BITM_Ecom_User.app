@@ -35,9 +35,10 @@ class UserProfilePage extends StatelessWidget {
                       showSingleTextInputDialog(
                         context: context,
                         title: 'Mobile Number',
+                        inputType: TextInputType.phone,
                         onSubmit: (value) {
                           print('input: $value');
-
+                          userProvider.updateUserProfileField(userFieldPhone, value);
                         },
                       );
                     },

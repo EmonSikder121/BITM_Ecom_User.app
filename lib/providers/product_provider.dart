@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:ecom_user_pb_bitm/auth/authservice.dart';
+import 'package:ecom_user_pb_bitm/models/comment_model.dart';
+import 'package:ecom_user_pb_bitm/models/rating_model.dart';
+import 'package:ecom_user_pb_bitm/models/user_model.dart';
+import 'package:ecom_user_pb_bitm/utils/helper_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import '../db/db_helper.dart';
@@ -9,7 +14,6 @@ import '../models/purchase_model.dart';
 class ProductProvider extends ChangeNotifier {
   List<CategoryModel> categoryList = [];
   List<ProductModel> productList = [];
-
 
   getAllCategories() {
     DbHelper.getAllCategories().listen((snapshot) {
@@ -42,23 +46,60 @@ class ProductProvider extends ChangeNotifier {
     return productList.firstWhere((element) => element.productId == productId);
   }
 
-  Future<void> updateProductField(String productId, String field, dynamic value) {
-    return DbHelper.updateProductField(productId, {field : value});
+  Future<void> updateProductField(
+      String productId, String field, dynamic value) {
+    return DbHelper.updateProductField(productId, {field: value});
   }
 
   List<CategoryModel> getCategoryListForFiltering() {
-    return [CategoryModel(categoryName: 'All'), ... categoryList];
+    return [CategoryModel(categoryName: 'All'), ...categoryList];
   }
 
   getAllProductsByCategory(CategoryModel categoryModel) {
     DbHelper.getAllProductsByCategory(categoryModel).listen((snapshot) {
-      productList = List.generate(snapshot.docs.length, (index) =>
-          ProductModel.fromMap(snapshot.docs[index].data()));
+      productList = List.generate(snapshot.docs.length,
+          (index) => ProductModel.fromMap(snapshot.docs[index].data()));
       notifyListeners();
     });
   }
 
-  /*
+  Future<void> addRating(double rating, String pid) async {
+    final ratingModel = RatingModel(
+      ratingId: AuthService.currentUser!.uid,
+      userId: AuthService.currentUser!.uid,
+      productId: pid,
+      rating: rating,
+    );
+    await DbHelper.addRating(ratingModel);
+    final snapshot = await DbHelper.getRatingsByProduct(pid);
+    double total = 0.0;
+    final ratingList = List.generate(snapshot.docs.length,
+        (index) => RatingModel.fromMap(snapshot.docs[index].data()));
+    for (var rating in ratingList) {
+      total += rating.rating;
+    }
+    final avgRating = total / ratingList.length;
+    return updateProductField(pid, productFieldAvgRating, avgRating);
+  }
+
+  Future<CommentModel> addComment(UserModel userModel, String pid, String comment) async {
+    final commentModel = CommentModel(
+      commentId: DateTime.now().millisecondsSinceEpoch,
+      userModel: userModel,
+      productId: pid,
+      comment: comment,
+      date: getFormattedDate(DateTime.now(), pattern: 'dd/MM/yyyy hh:mm:ss a'),
+    );
+    await DbHelper.addComment(commentModel);
+    return commentModel;
+  }
+
+  Future<List<CommentModel>>getAllCommentsByProduct(String pid) async {
+    final snapshot = await DbHelper.getAllCommentsByProduct(pid);
+    return List.generate(snapshot.docs.length, (index) => CommentModel.fromMap(snapshot.docs[index].data()));
+  }
+
+/*
   Future<String> uploadImage(String thumbnailImageLocalPath) async {
     final photoRef = FirebaseStorage.instance
         .ref()
@@ -87,9 +128,7 @@ class ProductProvider extends ChangeNotifier {
     return DbHelper.repurchase(purchaseModel, productModel);
   }
 
-  Future<void> updateProductField(String productId, String field, dynamic value) {
-    return DbHelper.updateProductField(productId, {field : value});
-  }
+
 
   */
 }
